@@ -36,7 +36,6 @@ void bemVindo() {
 
 
 
-int main()
-{
+int main() {
     return 0;
 }
