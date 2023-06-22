@@ -51,7 +51,7 @@ void signIn() {
 
     cout << endl;
 
-    ofstream file("login.txt");
+    ofstream file("login.txt", ios::app);
 
     if (file.is_open()) {
         file << "Username: " << username << "\n";
@@ -126,6 +126,7 @@ void logIn() {
     char c;
     char password[20];
     int i = 0;
+    
 
     cout << "Digite o username: ";
     cin >> username;
@@ -150,7 +151,7 @@ void logIn() {
         while (getline(file, line)) {
             if (line.find("Username: " + username) != string::npos) {
                 getline(file, line);
-                if (line.find("Password: " + password) != string::npos) {
+                if (line.find("Password: " + string(password)) != string::npos) {
                     found = true;
                     break;
                 }
@@ -203,13 +204,9 @@ int lerOpcao(){
 int main() {
     setlocale(LC_ALL, "");
 
-    bemVindo();
-
     int opcao;
 
     do{
-        system("cls");
-
         bemVindo();
 
         opcao = lerOpcao();
