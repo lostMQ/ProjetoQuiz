@@ -169,16 +169,6 @@ void logIn() {
     }
 }
 
-void apagarConta() {
-    char choice;
-    cout << "Deseja apagar a sua conta? (s/n): ";
-    cin >> choice;
-
-    if (choice == 's' || choice == 'S') {
-        deleteAccount();
-    }
-}
-
 void despedida(){
     system("cls");
 
@@ -229,7 +219,7 @@ int main() {
             break;
             case 2: logIn();
             break;
-            case 3: apagarConta();
+            case 3: deleteAccount();
             break;
             case 4: quiz();
             break;
