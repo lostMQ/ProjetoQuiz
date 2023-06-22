@@ -27,6 +27,7 @@ void bemVindo() {
 }
 
 void signIn() {
+    system("cls");
     string username;
     char c;
     char password[20];
@@ -66,6 +67,7 @@ void signIn() {
 }
 
 void deleteAccount() {
+    system("cls");
     ifstream file("login.txt");
     ofstream tempFile("temp.txt");
     string line;
@@ -120,6 +122,7 @@ void deleteAccount() {
 }
 
 void logIn() {
+    system("cls");
     ifstream file("login.txt");
     string line;
     string username;
@@ -177,6 +180,7 @@ void despedida(){
 }
 
 void quiz() {
+    system("cls");
 
 }
 
@@ -216,9 +220,9 @@ int main() {
             break;
             case 2: logIn();
             break;
-            case 3: deleteAccount();
+            case 3: quiz();
             break;
-            case 4: quiz();
+            case 4: deleteAccount();
             break;
             case 5: despedida();
             break;
