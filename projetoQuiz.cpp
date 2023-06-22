@@ -13,20 +13,43 @@ using namespace std;
 
 void bemVindo() {
     cout << "-------------------------------------" << endl;
+    cout << "-------------------------------------" << endl;
     cout << "--------------BEM VINDO--------------" << endl;
     cout << "-------------------------------------" << endl;
-    cout << "-----Vamos iniciar o seu registo-----" << endl;
     cout << "-------------------------------------" << endl;
+    cout << "Escolha uma opção:" << endl;
+    cout << "1 Sign In" << endl;
+    cout << "2 Log In" << endl;
+    cout << "3 Começar quiz" << endl;
+    cout << "4 Apagar conta" << endl;
+    cout << "5 Sair" << endl;
+    cout << "> ";
 }
 
-void logIn() {
-    string username, password;
+void signIn() {
+    string username;
+    char c;
+    char password[20];
+    int i = 0;
 
-    cout << "Enter username: ";
+    cout << "Digite o username: ";
     cin >> username;
 
-    cout << "Enter password: ";
-    cin >> password;
+    cout << "Digite a password: ";
+    while ((c = _getch()) != '\r') {
+        if (c == '\b' && i > 0) {
+            cout << "\b \b";
+            i--;
+        } else if (c != '\b') {
+            password[i] = c;
+            cout << '*';
+            i++;
+        }
+    }
+
+    password[i] = '\0';
+
+    cout << endl;
 
     ofstream file("login.txt");
 
@@ -36,9 +59,9 @@ void logIn() {
 
         file.close();
 
-        cout << "Login information saved to login.txt\n";
+        cout << "Conta guardada com sucesso\n";
     } else {
-        cout << "Error opening the file!\n";
+        cout << "Erro ao abrir ficheiro!\n";
     }
 }
 
@@ -46,13 +69,27 @@ void deleteAccount() {
     ifstream file("login.txt");
     ofstream tempFile("temp.txt");
     string line;
-    string username, password;
+    string username;
+    char c;
+    char password[20];
+    int i = 0;
 
-    cout << "Enter username to delete the account: ";
+    cout << "Digite o username para apagar a conta: ";
     cin >> username;
 
-    cout << "Enter password: ";
-    cin >> password;
+    cout << "Digite a password: ";
+    while ((c = _getch()) != '\r') {
+        if (c == '\b' && i > 0) {
+            cout << "\b \b";
+            i--;
+        } else if (c != '\b') {
+            password[i] = c;
+            cout << '*';
+            i++;
+        }
+    }
+
+    password[i] = '\0';
 
     bool found = false;
 
@@ -72,16 +109,91 @@ void deleteAccount() {
         if (found) {
             remove("login.txt");
             rename("temp.txt", "login.txt");
-            cout << "Account deleted successfully!\n";
+            cout << "Conta apagada com sucesso!\n";
         } else {
             remove("temp.txt");
-            cout << "Account not found.\n";
+            cout << "Conta não encontrada.\n";
         }
     } else {
-        cout << "Error opening the file!\n";
+        cout << "Erro ao abrir o ficheiro!\n";
     }
 }
 
+void logIn() {
+    ifstream file("login.txt");
+    string line;
+    string username;
+    char c;
+    char password[20];
+    int i = 0;
+
+    cout << "Digite o username: ";
+    cin >> username;
+
+    cout << "Digite a password: ";
+    while ((c = _getch()) != '\r') {
+        if (c == '\b' && i > 0) {
+            cout << "\b \b";
+            i--;
+        } else if (c != '\b') {
+            password[i] = c;
+            cout << '*';
+            i++;
+        }
+    }
+
+    password[i] = '\0';
+
+    bool found = false;
+
+    if (file.is_open()) {
+        while (getline(file, line)) {
+            if (line.find("Username: " + username) != string::npos) {
+                getline(file, line);
+                if (line.find("Password: " + password) != string::npos) {
+                    found = true;
+                    break;
+                }
+            }
+        }
+
+        file.close();
+
+        if (found) {
+            cout << "Login bem sucedido!\n";
+        } else {
+            cout << "Credenciais inválidas.\n";
+        }
+    } else {
+        cout << "Erro ao abrir o ficheiro!\n";
+    }
+}
+
+void apagarConta() {
+    char choice;
+    cout << "Deseja apagar a sua conta? (s/n): ";
+    cin >> choice;
+
+    if (choice == 's' || choice == 'S') {
+        deleteAccount();
+    }
+}
+
+void despedida(){
+    system("cls");
+
+    cout << "Obrigado por realizar o nosso quiz!";
+}
+
+void quiz() {
+
+}
+
+int lerOpcao(){
+    int a;
+    cin >> a;
+    return a;
+}
 
 
 
@@ -102,15 +214,30 @@ int main() {
     setlocale(LC_ALL, "");
 
     bemVindo();
-    logIn();
 
-    char choice;
-    cout << "Do you want to delete your account? (y/n): ";
-    cin >> choice;
+    int opcao;
 
-    if (choice == 'y' || choice == 'Y') {
-        deleteAccount();
-    }
+    do{
+        system("cls");
+
+        bemVindo();
+
+        opcao = lerOpcao();
+
+        switch(opcao){
+            case 1: signIn();
+            break;
+            case 2: logIn();
+            break;
+            case 3: apagarConta();
+            break;
+            case 4: quiz();
+            break;
+            case 5: despedida();
+            break;
+            default: cout << "Opção inválida, tente novamente." << endl;
+        }
+    }while(opcao != 5);
 
 
     return 0;
