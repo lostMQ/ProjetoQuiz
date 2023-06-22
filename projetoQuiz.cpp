@@ -12,6 +12,7 @@
 using namespace std;
 
 void bemVindo() {
+    system("CLS");
     cout << "-------------------------------------" << endl;
     cout << "-------------------------------------" << endl;
     cout << "--------------BEM VINDO--------------" << endl;
@@ -129,7 +130,7 @@ void logIn() {
     char c;
     char password[20];
     int i = 0;
-    
+
 
     cout << "Digite o username: ";
     cin >> username;
@@ -147,6 +148,8 @@ void logIn() {
     }
 
     password[i] = '\0';
+
+    cout << endl;
 
     bool found = false;
 
