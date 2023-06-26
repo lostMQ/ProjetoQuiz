@@ -111,6 +111,8 @@ void deleteAccount() {
         file.close();
         tempFile.close();
 
+        system("cls");
+
         if (found) {
             remove("login.txt");
             rename("temp.txt", "login.txt");
@@ -154,6 +156,24 @@ bool logIn() {
         blockedFile.close();
     }
 
+    map<string, string> credentials;
+
+    if (file.is_open()) {
+        while (getline(file, line)) {
+            if (line.find("Username: ") != string::npos) {
+                username = line.substr(10);
+            } else if (line.find("Password: ") != string::npos) {
+                string pass = line.substr(10);
+                credentials[username] = pass;
+            }
+        }
+        file.close();
+    } else {
+        cout << "Erro ao abrir o ficheiro!\n";
+        sleep(2);
+        return false;
+    }
+
     do {
         cout << "Digite a password: ";
         i = 0;
@@ -172,50 +192,31 @@ bool logIn() {
 
         cout << endl;
 
-        bool found = false;
-
-        if (file.is_open()) {
-            while (getline(file, line)) {
-                if (line.find("Username: " + username) != string::npos) {
-                    getline(file, line);
-                    if (line.find("Password: " + string(password)) != string::npos) {
-                        found = true;
-                        loggedIn = true;
-                        break;
-                    }
-                }
-            }
-
-            file.clear();
-            file.seekg(0, ios::beg);
-
-            if (found) {
+        if (credentials.find(username) != credentials.end()) {
+            if (credentials[username] == password) {
                 cout << "Login bem sucedido!\n";
                 sleep(2);
+                loggedIn = true;
                 break;
-            } else {
-                cout << "Credenciais inválidas.\n";
-                failedAttempts++;
-                sleep(2);
-
-                if (failedAttempts == 3) {
-                    cout << "Número máximo de tentativas excedido. A conta foi bloqueada.\n";
-                    sleep(2);
-
-                    ofstream blockedFile("blocked.txt", ios::app);
-                    if (blockedFile.is_open()) {
-                        blockedFile << username << "\n";
-                        blockedFile.close();
-                    } else {
-                        cout << "Erro ao bloquear a conta. Tente novamente.\n";
-                        sleep(2);
-                    }
-                }
             }
-        } else {
-            cout << "Erro ao abrir o ficheiro!\n";
+        }
+
+        cout << "Credenciais inválidas.\n";
+        failedAttempts++;
+        sleep(2);
+
+        if (failedAttempts == 3) {
+            cout << "Número máximo de tentativas excedido. A conta foi bloqueada.\n";
             sleep(2);
-            return false;
+
+            ofstream blockedFile("blocked.txt", ios::app);
+            if (blockedFile.is_open()) {
+                blockedFile << username << "\n";
+                blockedFile.close();
+            } else {
+                cout << "Erro ao bloquear a conta. Tente novamente.\n";
+                sleep(2);
+            }
         }
     } while (failedAttempts < 3);
 
