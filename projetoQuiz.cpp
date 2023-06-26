@@ -9,6 +9,7 @@
 #include <map>
 #include <fstream>
 #include <unistd.h>
+#include <vector>
 
 using namespace std;
 
@@ -129,14 +130,18 @@ void deleteAccount() {
     }
 }
 
+struct User {
+    string username;
+    string password;
+};
+
 bool logIn() {
     system("cls");
     ifstream file("login.txt");
     string line;
     string username;
     char c;
-    char password[20];
-    int i = 0;
+    string password;
     int failedAttempts = 0;
     bool loggedIn = false;
 
@@ -156,52 +161,51 @@ bool logIn() {
         blockedFile.close();
     }
 
-    map<string, string> credentials;
-
-    if (file.is_open()) {
-        while (getline(file, line)) {
-            if (line.find("Username: ") != string::npos) {
-                username = line.substr(10);
-            } else if (line.find("Password: ") != string::npos) {
-                string pass = line.substr(10);
-                credentials[username] = pass;
-            }
-        }
-        file.close();
-    } else {
-        cout << "Erro ao abrir o ficheiro!\n";
-        sleep(2);
-        return false;
-    }
-
     do {
         cout << "Digite a password: ";
-        i = 0;
-        while ((c = _getch()) != '\r') {
-            if (c == '\b' && i > 0) {
-                cout << "\b \b";
-                i--;
-            } else if (c != '\b') {
-                password[i] = c;
-                cout << '*';
-                i++;
+        cin.ignore();
+        getline(cin, password);
+
+        if (password.empty()) {
+            cout << "Senha vazia. Tente novamente.\n";
+            continue;
+        }
+
+        file.clear();
+        file.seekg(0, ios::beg);
+
+        bool found = false;
+        bool passwordMatched = false;
+
+        while (getline(file, line)) {
+            if (line.find("Username: " + username) != string::npos) {
+                found = true;
+                getline(file, line);
+
+                if (line.find("Password: " + password) != string::npos) {
+                    cout << "Log In bem sucedido!\n";
+                    sleep(2);
+                    loggedIn = true;
+                    passwordMatched = true;
+                    break;
+                }
             }
         }
 
-        password[i] = '\0';
-
-        cout << endl;
-
-        if (credentials.find(username) != credentials.end()) {
-            if (credentials[username] == password) {
-                cout << "Login bem sucedido!\n";
-                sleep(2);
-                loggedIn = true;
-                break;
-            }
+        if (loggedIn) {
+            break;
         }
 
-        cout << "Credenciais inválidas.\n";
+        if (found) {
+            if (passwordMatched) {
+                cout << "Credenciais inválidas.\n";
+            } else {
+                cout << "Senha incorreta.\n";
+            }
+        } else {
+            cout << "Usuário não encontrado.\n";
+        }
+
         failedAttempts++;
         sleep(2);
 
@@ -220,18 +224,18 @@ bool logIn() {
         }
     } while (failedAttempts < 3);
 
+    file.close();
     return loggedIn;
 }
 
-void despedida(){
+void despedida() {
     system("cls");
-
     cout << "Obrigado por realizar o nosso quiz!";
 }
 
 void quiz() {
     system("cls");
-
+    // Implement your quiz logic here
 }
 
 void quizMenu() {
@@ -246,7 +250,7 @@ void quizMenu() {
 
     switch (option) {
         case 1:
-            // quiz();
+            quiz();
             break;
         case 2:
             despedida();
@@ -257,45 +261,27 @@ void quizMenu() {
     }
 }
 
-int lerOpcao(){
+int lerOpcao() {
     int a;
     cin >> a;
     return a;
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 int main() {
     setlocale(LC_ALL, "");
 
     int opcao;
-    bool loggedIn = false;
 
     do {
         bemVindo();
-
         opcao = lerOpcao();
 
-        switch(opcao) {
+        switch (opcao) {
             case 1:
                 signIn();
                 break;
             case 2:
-                loggedIn = logIn();
-                if (loggedIn) {
+                if (logIn()) {
                     quizMenu();
                 }
                 break;
@@ -307,8 +293,9 @@ int main() {
                 break;
             default:
                 cout << "Opção inválida, tente novamente." << endl;
+                sleep(2);
         }
-    } while(opcao != 4);
+    } while (opcao != 4);
 
     return 0;
 }
