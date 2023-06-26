@@ -184,7 +184,7 @@ bool logIn() {
                 getline(file, line);
 
                 if (line.find("Password: " + password) != string::npos) {
-                    cout << "Log In bem sucedido!\n";
+                    cout << "Log in bem sucedido!\n";
                     sleep(2);
                     loggedIn = true;
                     passwordMatched = true;
