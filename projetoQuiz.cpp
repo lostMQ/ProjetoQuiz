@@ -8,6 +8,7 @@
 #include <cstring>
 #include <map>
 #include <fstream>
+#include <unistd.h>
 
 using namespace std;
 
@@ -21,9 +22,8 @@ void bemVindo() {
     cout << "Escolha uma opção:" << endl;
     cout << "1 Sign In" << endl;
     cout << "2 Log In" << endl;
-    cout << "3 Começar quiz" << endl;
-    cout << "4 Apagar conta" << endl;
-    cout << "5 Sair" << endl;
+    cout << "3 Apagar conta" << endl;
+    cout << "4 Sair" << endl;
     cout << "> ";
 }
 
@@ -62,8 +62,10 @@ void signIn() {
         file.close();
 
         cout << "Conta guardada com sucesso\n";
+        sleep(2);
     } else {
         cout << "Erro ao abrir ficheiro!\n";
+        sleep (2);
     }
 }
 
@@ -113,16 +115,19 @@ void deleteAccount() {
             remove("login.txt");
             rename("temp.txt", "login.txt");
             cout << "Conta apagada com sucesso!\n";
+            sleep(2);
         } else {
             remove("temp.txt");
             cout << "Conta não encontrada.\n";
+            sleep(2);
         }
     } else {
         cout << "Erro ao abrir o ficheiro!\n";
+        sleep (2);
     }
 }
 
-void logIn() {
+bool logIn() {
     system("cls");
     ifstream file("login.txt");
     string line;
@@ -130,50 +135,93 @@ void logIn() {
     char c;
     char password[20];
     int i = 0;
-
+    int failedAttempts = 0;
+    bool loggedIn = false;
 
     cout << "Digite o username: ";
     cin >> username;
 
-    cout << "Digite a password: ";
-    while ((c = _getch()) != '\r') {
-        if (c == '\b' && i > 0) {
-            cout << "\b \b";
-            i--;
-        } else if (c != '\b') {
-            password[i] = c;
-            cout << '*';
-            i++;
+    // Check if the user is blocked
+    ifstream blockedFile("blocked.txt");
+    if (blockedFile.is_open()) {
+        while (getline(blockedFile, line)) {
+            if (line == username) {
+                cout << "A conta está bloqueada. Entre em contato com o suporte.\n";
+                blockedFile.close();
+                sleep(2);
+                return false;
+            }
         }
+        blockedFile.close();
     }
 
-    password[i] = '\0';
-
-    cout << endl;
-
-    bool found = false;
-
-    if (file.is_open()) {
-        while (getline(file, line)) {
-            if (line.find("Username: " + username) != string::npos) {
-                getline(file, line);
-                if (line.find("Password: " + string(password)) != string::npos) {
-                    found = true;
-                    break;
-                }
+    do {
+        cout << "Digite a password: ";
+        i = 0;
+        while ((c = _getch()) != '\r') {
+            if (c == '\b' && i > 0) {
+                cout << "\b \b";
+                i--;
+            } else if (c != '\b') {
+                password[i] = c;
+                cout << '*';
+                i++;
             }
         }
 
-        file.close();
+        password[i] = '\0';
 
-        if (found) {
-            cout << "Login bem sucedido!\n";
+        cout << endl;
+
+        bool found = false;
+
+        if (file.is_open()) {
+            while (getline(file, line)) {
+                if (line.find("Username: " + username) != string::npos) {
+                    getline(file, line);
+                    if (line.find("Password: " + string(password)) != string::npos) {
+                        found = true;
+                        loggedIn = true;
+                        break;
+                    }
+                }
+            }
+
+            file.clear(); // Clear any error flags
+            file.seekg(0, ios::beg); // Reset file position to the beginning
+
+            if (found) {
+                cout << "Login bem sucedido!\n";
+                sleep(2);
+                break;
+            } else {
+                cout << "Credenciais inválidas.\n";
+                failedAttempts++;
+                sleep(2);
+
+                if (failedAttempts == 3) {
+                    cout << "Número máximo de tentativas excedido. A conta foi bloqueada.\n";
+                    sleep(2);
+
+                    // Add the username to the blocked list
+                    ofstream blockedFile("blocked.txt", ios::app);
+                    if (blockedFile.is_open()) {
+                        blockedFile << username << "\n";
+                        blockedFile.close();
+                    } else {
+                        cout << "Erro ao bloquear a conta. Tente novamente.\n";
+                        sleep(2);
+                    }
+                }
+            }
         } else {
-            cout << "Credenciais inválidas.\n";
+            cout << "Erro ao abrir o ficheiro!\n";
+            sleep(2);
+            return false; // Return false if file opening fails
         }
-    } else {
-        cout << "Erro ao abrir o ficheiro!\n";
-    }
+    } while (failedAttempts < 3);
+
+    return loggedIn;
 }
 
 void despedida(){
@@ -185,6 +233,29 @@ void despedida(){
 void quiz() {
     system("cls");
 
+}
+
+void quizMenu() {
+    system("cls");
+    cout << "Quiz" << endl;
+    cout << "1 Começar quiz" << endl;
+    cout << "2 Sair" << endl;
+    cout << "> ";
+
+    int option;
+    cin >> option;
+
+    switch (option) {
+        case 1:
+            // quiz();
+            break;
+        case 2:
+            despedida();
+            break;
+        default:
+            cout << "Opção inválida, tente novamente." << endl;
+            sleep(2);
+    }
 }
 
 int lerOpcao(){
@@ -212,27 +283,33 @@ int main() {
     setlocale(LC_ALL, "");
 
     int opcao;
+    bool loggedIn = false;
 
-    do{
+    do {
         bemVindo();
 
         opcao = lerOpcao();
 
-        switch(opcao){
-            case 1: signIn();
-            break;
-            case 2: logIn();
-            break;
-            case 3: quiz();
-            break;
-            case 4: deleteAccount();
-            break;
-            case 5: despedida();
-            break;
-            default: cout << "Opção inválida, tente novamente." << endl;
+        switch(opcao) {
+            case 1:
+                signIn();
+                break;
+            case 2:
+                loggedIn = logIn();
+                if (loggedIn) {
+                    quizMenu();
+                }
+                break;
+            case 3:
+                deleteAccount();
+                break;
+            case 4:
+                despedida();
+                break;
+            default:
+                cout << "Opção inválida, tente novamente." << endl;
         }
-    }while(opcao != 5);
-
+    } while(opcao != 4);
 
     return 0;
 }
