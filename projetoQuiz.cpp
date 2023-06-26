@@ -141,7 +141,6 @@ bool logIn() {
     cout << "Digite o username: ";
     cin >> username;
 
-    // Check if the user is blocked
     ifstream blockedFile("blocked.txt");
     if (blockedFile.is_open()) {
         while (getline(blockedFile, line)) {
@@ -187,8 +186,8 @@ bool logIn() {
                 }
             }
 
-            file.clear(); // Clear any error flags
-            file.seekg(0, ios::beg); // Reset file position to the beginning
+            file.clear();
+            file.seekg(0, ios::beg);
 
             if (found) {
                 cout << "Login bem sucedido!\n";
@@ -203,7 +202,6 @@ bool logIn() {
                     cout << "Número máximo de tentativas excedido. A conta foi bloqueada.\n";
                     sleep(2);
 
-                    // Add the username to the blocked list
                     ofstream blockedFile("blocked.txt", ios::app);
                     if (blockedFile.is_open()) {
                         blockedFile << username << "\n";
@@ -217,7 +215,7 @@ bool logIn() {
         } else {
             cout << "Erro ao abrir o ficheiro!\n";
             sleep(2);
-            return false; // Return false if file opening fails
+            return false;
         }
     } while (failedAttempts < 3);
 
