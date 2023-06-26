@@ -10,6 +10,7 @@
 #include <fstream>
 #include <unistd.h>
 #include <vector>
+#include <limits>
 
 using namespace std;
 
@@ -263,7 +264,11 @@ void quizMenu() {
 
 int lerOpcao() {
     int a;
-    cin >> a;
+    while (!(cin >> a)) {
+        cin.clear();
+        cin.ignore(numeric_limits<streamsize>::max(), '\n');
+        cout << "Opção inválida, tente novamente: ";
+    }
     return a;
 }
 
