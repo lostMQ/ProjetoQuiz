@@ -35,7 +35,7 @@ struct Perguntas {
     int indiceRespostaCorreta;
     int pontuacao = 0;
 
-   void mostrarPergunta(int& opcao) {
+   void mostrarPergunta(User& user, int& opcao) {
     string respostasAleatorias[4] = {respostaCerta, respostaErrada1, respostaErrada2, respostaErrada3};
 
     unsigned seed = chrono::system_clock::now().time_since_epoch().count();
@@ -63,6 +63,8 @@ struct Perguntas {
         i++;
     }
 
+    cout << "Score: " << user.score << endl;
+
     if (i == endTime) {
         cout << "Tempo esgotado!" << endl;
         opcao = 0;
@@ -70,6 +72,7 @@ struct Perguntas {
         if (opcao == indiceRespostaCorreta) {
             cout << "Resposta correta!" << endl;
             pontuacao += 5;
+            user.score += pontuacao;
         } else {
             cout << "Resposta errada!" << endl;
             cout << "Resposta certa: " << respostaCerta << endl;
@@ -306,12 +309,24 @@ bool logIn() {
     return loggedIn;
 }
 
-void despedida() {
+void despedida(const User& user) {
     system("cls");
-    cout << "Obrigado por realizar o nosso quiz!";
+
+    ofstream scoreFile("score.txt", ios::app);
+
+    if (scoreFile.is_open()) {
+        scoreFile << "Username: " << user.username << "\n";
+        scoreFile << "Score: " << user.score << "\n";
+
+        scoreFile.close();
+
+        cout << "Obrigado por realizar o nosso quiz! Sua pontuação foi salva.\n";
+    } else {
+        cout << "Erro ao abrir o arquivo de pontuação.";
+    }
 }
 
-int quizcg() {
+int quizcg(User& user) {
     system("cls");
 
     int opcao;
@@ -337,12 +352,12 @@ int quizcg() {
     questao3.respostaErrada2 = "Genebra";
     questao3.respostaErrada3 = "Londres";
 
-    questao1.mostrarPergunta(opcao);
-    questao2.mostrarPergunta(opcao);
-    questao3.mostrarPergunta(opcao);
+    questao1.mostrarPergunta(user, opcao);
+    questao2.mostrarPergunta(user, opcao);
+    questao3.mostrarPergunta(user, opcao);
 }
 
-int quizcpp() {
+int quizcpp(User& user) {
     system("cls");
 
     int opcao;
@@ -368,12 +383,12 @@ int quizcpp() {
     questao3.respostaErrada2 = "cmath";
     questao3.respostaErrada3 = "string";
 
-    questao1.mostrarPergunta(opcao);
-    questao2.mostrarPergunta(opcao);
-    questao3.mostrarPergunta(opcao);
+    questao1.mostrarPergunta(user, opcao);
+    questao2.mostrarPergunta(user, opcao);
+    questao3.mostrarPergunta(user, opcao);
 }
 
-void themeMenu() {
+void themeMenu(User& user) {
     system("cls");
     cout << "Escolha o tema do Quiz:" << endl;
     cout << "1 Cultura Geral" << endl;
@@ -386,10 +401,10 @@ void themeMenu() {
 
     switch (option) {
         case 1:
-            quizcg();
+            quizcg(user);
             break;
         case 2:
-            quizcpp();
+            quizcpp(user);
             break;
         case 3:
             bemVindo();
@@ -397,7 +412,7 @@ void themeMenu() {
         default:
             cout << "Opção inválida, tente novamente." << endl;
             sleep(2);
-            themeMenu();
+            themeMenu(user);
     }
 }
 
@@ -414,7 +429,7 @@ int lerOpcao() {
 void pontuacao() {
 }
 
-void quizMenu() {
+void quizMenu(User& user) {
     system("cls");
     cout << "Quiz" << endl;
     cout << "1 Começar Quiz" << endl;
@@ -427,7 +442,7 @@ void quizMenu() {
 
     switch (option) {
         case 1:
-            themeMenu();
+            themeMenu(user);
             break;
         case 2:
             pontuacao();
@@ -438,7 +453,7 @@ void quizMenu() {
         default:
             cout << "Opção inválida, tente novamente." << endl;
             sleep(2);
-            quizMenu();
+            quizMenu(user);
     }
 }
 
@@ -446,6 +461,8 @@ int main() {
     setlocale(LC_ALL, "");
 
     int opcao;
+
+    User user("", "");
 
     do {
         bemVindo();
@@ -457,14 +474,14 @@ int main() {
                 break;
             case 2:
                 if (logIn()) {
-                    quizMenu();
+                    quizMenu(user);
                 }
                 break;
             case 3:
                 deleteAccount();
                 break;
             case 4:
-                despedida();
+                despedida(user);
                 break;
             default:
                 cout << "Opção inválida, tente novamente." << endl;
