@@ -11,8 +11,75 @@
 #include <unistd.h>
 #include <vector>
 #include <limits>
+#include <algorithm>
+#include <random>
+#include <chrono>
+#include "perguntas.cpp"
 
 using namespace std;
+
+struct User {
+    string username;
+    string password;
+    int score;
+
+    User(const string& u, const string& p) : username(u), password(p), score(0) {}
+};
+
+struct Perguntas {
+    string questao;
+    string respostaCerta;
+    string respostaErrada1;
+    string respostaErrada2;
+    string respostaErrada3;
+    int indiceRespostaCorreta;
+    int pontuacao = 0;
+
+    void mostrarPergunta(int& opcao){
+        string respostasAleatorias[4] = {respostaCerta, respostaErrada1, respostaErrada2, respostaErrada3};
+
+        unsigned seed = chrono::system_clock::now().time_since_epoch().count();
+        shuffle(begin(respostasAleatorias), end(respostasAleatorias), default_random_engine(seed));
+
+        cout << questao << endl;
+        for(int i = 0; i < 4; i++) {
+            cout << i+1 << ". " << respostasAleatorias[i] << endl;
+            if (respostasAleatorias[i] == respostaCerta){
+                    indiceRespostaCorreta = i + 1;
+            }
+        }
+        cout << "Tem 10s para escolher uma opcao (1-4): " << endl;
+
+        int endTime = 10;
+        int i = 0;
+            while (i < endTime) {
+                cin >> opcao;
+                i+=1;
+                endTime-=1;
+                if (endTime == 0){
+                break;
+            }
+            }
+        if (endTime == 0)
+            cout << "Tempo expirado!" << endl;
+
+                if (opcao == indiceRespostaCorreta){
+                    cout << "Resposta correta!"<< endl;
+                    pontuacao += 5;
+                    cout << endl;
+                    cout << "Digite qualquer tecla para continuar"<<endl;
+                    getch();
+                    system ("cls");
+                }else{
+                    cout << "Resposta errada!"<< endl;
+                    cout << endl;
+                    cout << "Resposta certa: "<< respostaCerta << endl;
+                    cout << endl;
+                    cout << "Digite qualquer tecla para continuar" << endl;
+                    getch();
+                    system ("cls");}
+    }
+};
 
 void bemVindo() {
     system("CLS");
@@ -131,14 +198,6 @@ void deleteAccount() {
     }
 }
 
-struct User {
-    string username;
-    string password;
-    int points;
-
-    User(const string& u, const string& p) : username(u), password(p), points(0) {}
-};
-
 bool logIn() {
     system("cls");
     ifstream file("login.txt");
@@ -250,17 +309,63 @@ void despedida() {
     cout << "Obrigado por realizar o nosso quiz!";
 }
 
-void quiz() {
+int quiz() {
     system("cls");
-    // Implement your quiz logic here
-}
 
-void pontuacao() {
+    int opcao;
 
-}
+    Perguntas questao1;
+    questao1.questao = "Quem foi o primeiro presidente dos Estados Unidos?";
+    questao1.respostaCerta = "George Washington";
+    questao1.respostaErrada1 = "Thomas Jefferson";
+    questao1.respostaErrada2 = "John Adams";
+    questao1.respostaErrada3 = "Abraham Lincoln";
 
-void scoreboard() {
 
+    Perguntas questao2;
+    questao2.questao = "Qual é a capital do Canadá?";
+    questao2.respostaCerta = "Toronto";
+    questao2.respostaErrada1 = "Ottawa";
+    questao2.respostaErrada2 = "Vancouver";
+    questao2.respostaErrada3 = "Montreal";
+
+    questao1.mostrarPergunta(opcao);
+    questao2.mostrarPergunta(opcao);
+    /*
+    int tema;
+    int dificuldade;
+    int pontuacao = 0;
+
+    cout << "Escolha o tema que pretende jogar!" << endl;
+    cout << "[1] -> Cultura Geral" << endl;
+    cout << "[2] -> C++" << endl;
+
+    cin >> tema;
+    system("cls");
+
+    cout << "Escolha a difilculdade!" << endl;
+    cout << "[1] -> Nivel Facil" << endl;
+    cout << "[2] -> Nivel Medio" << endl;
+    cout << "[3] -> Nivel Dificil" << endl;
+
+    cin >> dificuldade;
+
+    if(tema == 1 && dificuldade == 1){
+        perguntasFaceis(mostrarPergunta);}
+        else if(tema == 1 && dificuldade == 2){
+            perguntasMedias(pontuacao);}
+            else if(tema == 1 && dificuldade == 3){
+                perguntasDificeis(pontuacao);}
+
+     if(tema == 2 && dificuldade == 1){
+        perguntasFaceis(pontuacao);}
+        else if(tema == 2 && dificuldade == 2){
+            perguntasMedias(pontuacao);}
+            else if(tema == 2 && dificuldade == 3){
+                perguntasDificeis(pontuacao);}
+
+
+    return pontuacao;*/
 }
 
 int lerOpcao() {
@@ -273,13 +378,15 @@ int lerOpcao() {
     return a;
 }
 
+void pontuacao() {
+}
+
 void quizMenu() {
     system("cls");
     cout << "Quiz" << endl;
     cout << "1 Começar quiz" << endl;
-    cout << "2 A sua pontuação" << endl;
-    cout << "3 Scoreboard" << endl;
-    cout << "4 Sair" << endl;
+    cout << "2 Pontuação" << endl;
+    cout << "3 Voltar Atrás" << endl;
     cout << "> ";
 
     int option;
@@ -293,10 +400,7 @@ void quizMenu() {
             pontuacao();
             break;
         case 3:
-            scoreboard();
-            break;
-        case 4:
-            despedida();
+            bemVindo();
             break;
         default:
             cout << "Opção inválida, tente novamente." << endl;
