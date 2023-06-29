@@ -134,6 +134,9 @@ void deleteAccount() {
 struct User {
     string username;
     string password;
+    int points;
+
+    User(const string& u, const string& p) : username(u), password(p), points(0) {}
 };
 
 bool logIn() {
@@ -141,7 +144,6 @@ bool logIn() {
     ifstream file("login.txt");
     string line;
     string username;
-    char c;
     string password;
     int failedAttempts = 0;
     bool loggedIn = false;
@@ -164,8 +166,22 @@ bool logIn() {
 
     do {
         cout << "Digite a password: ";
-        cin.ignore();
-        getline(cin, password);
+        password = "";
+        char c;
+
+        while ((c = _getch()) != '\r') {
+            if (c == '\b') {
+                if (!password.empty()) {
+                    password.pop_back();
+                    cout << "\b \b";
+                }
+            } else {
+                password.push_back(c);
+                cout << '*';
+            }
+        }
+
+        cout << endl;
 
         if (password.empty()) {
             cout << "Senha vazia. Tente novamente.\n";
@@ -184,7 +200,7 @@ bool logIn() {
                 getline(file, line);
 
                 if (line.find("Password: " + password) != string::npos) {
-                    cout << "Log in bem sucedido!\n";
+                    cout << "Log In bem sucedido!\n";
                     sleep(2);
                     loggedIn = true;
                     passwordMatched = true;
@@ -239,27 +255,12 @@ void quiz() {
     // Implement your quiz logic here
 }
 
-void quizMenu() {
-    system("cls");
-    cout << "Quiz" << endl;
-    cout << "1 Começar quiz" << endl;
-    cout << "2 Sair" << endl;
-    cout << "> ";
+void pontuacao() {
 
-    int option;
-    cin >> option;
+}
 
-    switch (option) {
-        case 1:
-            quiz();
-            break;
-        case 2:
-            despedida();
-            break;
-        default:
-            cout << "Opção inválida, tente novamente." << endl;
-            sleep(2);
-    }
+void scoreboard() {
+
 }
 
 int lerOpcao() {
@@ -270,6 +271,37 @@ int lerOpcao() {
         cout << "Opção inválida, tente novamente: ";
     }
     return a;
+}
+
+void quizMenu() {
+    system("cls");
+    cout << "Quiz" << endl;
+    cout << "1 Começar quiz" << endl;
+    cout << "2 A sua pontuação" << endl;
+    cout << "3 Scoreboard" << endl;
+    cout << "4 Sair" << endl;
+    cout << "> ";
+
+    int option;
+    cin >> option;
+
+    switch (option) {
+        case 1:
+            quiz();
+            break;
+        case 2:
+            pontuacao();
+            break;
+        case 3:
+            scoreboard();
+            break;
+        case 4:
+            despedida();
+            break;
+        default:
+            cout << "Opção inválida, tente novamente." << endl;
+            sleep(2);
+    }
 }
 
 int main() {
